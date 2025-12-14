@@ -121,7 +121,7 @@ local function checkIP(ip, deferrals)
     end
 
     local apiUrl = string.format(
-        "https://proxycheck.io/v2/%s?key=%s&vpn=1&asn=1&risk=1",
+        "https://proxycheck.io/v3/%s?key=%s&vpn=1&asn=1&risk=1",
         ip,
         Config.API_KEY
     )
@@ -144,12 +144,12 @@ local function checkIP(ip, deferrals)
                 end
 
                 IPCache.data[ip] = {
-                    isProxy = result[ip].proxy == "yes",
+                    isProxy = result[ip].detections.proxy == "true",
                     timestamp = os.time(),
-                    country = result[ip].country or "Unknown",
-                    provider = result[ip].provider or "Unknown",
-                    type = result[ip].type or "Unknown",
-                    risk = result[ip].risk or "Unknown"
+                    country = result[ip].location.country_name or "Unknown",
+                    provider = result[ip].network.provider or result[ip].organisation or "Unknown",
+                    type = result[ip].network.type or "Unknown",
+                    risk = tonumber(result[ip].detections.risk) or 0
                 }
 
                 IPCache.cacheSize += 1
@@ -405,4 +405,5 @@ RegisterNetEvent('velocitylayer:requestClearCache', function(data)
     IPCache.data = {}
     IPCache.cacheSize = 0
     IPCache.lastCleanup = os.time()
+
 end)
